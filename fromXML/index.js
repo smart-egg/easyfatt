@@ -81,8 +81,8 @@ module.exports = (context, req) => {
                                                 for (let childIndex = 0; childIndex < childItems.length; childIndex++) {
                                                     let row = Object.assign({}, newEl);
                                                     const childItem = childItems[childIndex];
-                                                    row['InvoiceRow.RowNumber'] = childIndex + 1;
-                                                    row['InvoiceRow.RowID'] = "R" + "|"
+                                                    row['DocumentRow.RowNumber'] = childIndex + 1;
+                                                    row['DocumentRow.RowID'] = "R" + "|"
                                                                                 + item["DocumentType"] + "|"
                                                                                 + item["Date"] + "|"
                                                                                 + item["Number"] + "|"
@@ -91,10 +91,10 @@ module.exports = (context, req) => {
                                                     for (const childKey in childItem) {
                                                         if (childItem.hasOwnProperty(childKey)) {
                                                             if (childKey === 'VatCode') {
-                                                                if (childItem[childKey][0]._ === undefined) row['InvoiceRow.' + childKey] = "";
-                                                                else row['InvoiceRow.' + childKey] = childItem[childKey][0]._;
+                                                                if (childItem[childKey][0]._ === undefined) row['DocumentRow.' + childKey] = "";
+                                                                else row['DocumentRow.' + childKey] = childItem[childKey][0]._;
                                                             } else {
-                                                                row['InvoiceRow.' + childKey] = childItem[childKey][0];
+                                                                row['DocumentRow.' + childKey] = childItem[childKey][0];
                                                             }
                                                         }
                                                     }
@@ -123,10 +123,10 @@ module.exports = (context, req) => {
                                                         shipID = id;
                                                         shipDate = date;
                                                     }
-                                                    row['InvoiceRow.OrderID'] = orderID;
-                                                    row['InvoiceRow.OrderDate'] = orderDate;
-                                                    row['InvoiceRow.ShipmentID'] = shipID;
-                                                    row['InvoiceRow.ShipmentDate'] = shipDate;
+                                                    row['DocumentRow.OrderID'] = orderID;
+                                                    row['DocumentRow.OrderDate'] = orderDate;
+                                                    row['DocumentRow.ShipmentID'] = shipID;
+                                                    row['DocumentRow.ShipmentDate'] = shipDate;
                                                     documents.push(row);
                                                 }
                                             } else {
@@ -259,8 +259,8 @@ module.exports = (context, req) => {
     //                                             for (let childIndex = 0; childIndex < childItems.length; childIndex++) {
     //                                                 let row = Object.assign({}, newEl);
     //                                                 const childItem = childItems[childIndex];
-    //                                                 row['InvoiceRow.RowNumber'] = childIndex + 1;
-    //                                                 row['InvoiceRow.RowID'] = "R" + "|"
+    //                                                 row['DocumentRow.RowNumber'] = childIndex + 1;
+    //                                                 row['DocumentRow.RowID'] = "R" + "|"
     //                                                                             + item["DocumentType"] + "|"
     //                                                                             + item["Date"] + "|"
     //                                                                             + item["Number"] + "|"
@@ -269,10 +269,10 @@ module.exports = (context, req) => {
     //                                                 for (const childKey in childItem) {
     //                                                     if (childItem.hasOwnProperty(childKey)) {
     //                                                         if (childKey === 'VatCode') {
-    //                                                             if (childItem[childKey][0]._ === undefined) row['InvoiceRow.' + childKey] = "";
-    //                                                             else row['InvoiceRow.' + childKey] = childItem[childKey][0]._;
+    //                                                             if (childItem[childKey][0]._ === undefined) row['DocumentRow.' + childKey] = "";
+    //                                                             else row['DocumentRow.' + childKey] = childItem[childKey][0]._;
     //                                                         } else {
-    //                                                             row['InvoiceRow.' + childKey] = childItem[childKey][0];
+    //                                                             row['DocumentRow.' + childKey] = childItem[childKey][0];
     //                                                         }
     //                                                     }
     //                                                 }
@@ -301,10 +301,10 @@ module.exports = (context, req) => {
     //                                                     shipID = id;
     //                                                     shipDate = date;
     //                                                 }
-    //                                                 row['InvoiceRow.OrderID'] = orderID;
-    //                                                 row['InvoiceRow.OrderDate'] = orderDate;
-    //                                                 row['InvoiceRow.ShipmentID'] = shipID;
-    //                                                 row['InvoiceRow.ShipmentDate'] = shipDate;
+    //                                                 row['DocumentRow.OrderID'] = orderID;
+    //                                                 row['DocumentRow.OrderDate'] = orderDate;
+    //                                                 row['DocumentRow.ShipmentID'] = shipID;
+    //                                                 row['DocumentRow.ShipmentDate'] = shipDate;
     //                                                 documents.push(row);
     //                                             }
     //                                         } else {
