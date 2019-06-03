@@ -4,7 +4,7 @@ const request = require('request');
 const xml2js = require('xml2js');
 const fs = require('fs');
 const parser = new xml2js.Parser({attrkey: 'Attr'});
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const createCsvStringifier = require('csv-writer').createObjectCsvStringifier;
 
 module.exports = (context, req) => {
     context.log('JavaScript HTTP trigger function processed a request.');
@@ -149,40 +149,23 @@ module.exports = (context, req) => {
                         };
                     });
 
-                    const csvWriter = createCsvWriter({
-                        path: 'output.csv',
+                    const csvStringifier = createCsvStringifier({
                         header: csvHeader,
                     });
 
-                    csvWriter.writeRecords(documents)
-                    .then(() => {
-                        fs.readFile('output.csv', function(err,data){
-                            if (!err) {
-                                context.res = {
-                                    status: 200,
-                                    headers: {
-                                        "Content-Type": "text/csv",
-                                        "Content-Disposition": 'attachment;filename="'+outFilename+'"'
-                                    },
-                                    body: new Uint8Array(data)
-                                };
-                                context.done();
-                            } else {
-                                context.res = {
-                                    status: 500,
-                                    body: err.toString(),
-                                };
-                                context.done();
-                            }
-                        });
-                    })
-                    .catch((res) => {
-                        context.res = {
-                            status: 500,
-                            body: res.toString(),
-                        };
-                        context.done();
-                    });
+                    let bufStr = csvStringifier.getHeaderString();
+                    bufStr += csvStringifier.stringifyRecords(documents);
+                    const buf = Buffer.from(bufStr);
+
+                    context.res = {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "text/csv",
+                            "Content-Disposition": 'attachment;filename="'+outFilename+'"'
+                        },
+                        body: new Uint8Array(buf)
+                    };
+                    context.done();
                 } else {
                     context.res = {
                         status: res.statusCode,
