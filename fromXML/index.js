@@ -2,17 +2,18 @@
 
 const request = require('request');
 const xml2js = require('xml2js');
+const fs = require('fs');
 const parser = new xml2js.Parser({attrkey: 'Attr'});
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 module.exports = (context, req) => {
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    const {url} = req.query || req.body;
+    const {sourceUrl, expand, outFilename} = req.query || req.body;
     
     getOptions = {
         method: 'GET',
-        url: url,
+        url: sourceUrl,
     };
 
     request(getOptions, (err, res, req) => {
@@ -39,6 +40,7 @@ module.exports = (context, req) => {
                     for (let index = 0; index < temp.length; index++) {
                         const item = temp[index];
                         let newEl = Object.assign({}, company);
+                        let childItems = [];
                         for (const key in item) {
                             if (item.hasOwnProperty(key)) {
                                 switch (key) {
@@ -46,22 +48,45 @@ module.exports = (context, req) => {
                                         newEl['Invoice.' + key] = item[key][0]._;
                                         break;
                                     case 'Payments':
+                                        if (expand === 'payments') {
+                                            if (item[key][0].hasOwnProperty('Payment')) {
+                                                childItems = item[key][0].Payment;
+                                                for (let childIndex = 0; childIndex < childItems.length; childIndex++) {
+                                                    let row = Object.assign({}, newEl);
+                                                    const childItem = childItems[childIndex];
+                                                    for (const childKey in childItem) {
+                                                        if (childItem.hasOwnProperty(childKey)) {
+                                                            row['Invoice.Payment.' + childKey] = childItem[childKey][0];
+                                                        }
+                                                    }
+                                                    documents.push(row);
+                                                }
+                                            } else {
+                                                documents.push(newEl);
+                                            }
+                                        }
                                         break;
                                     case 'Rows':
-                                        const childItems = item[key][0].Row;
-                                        for (let childIndex = 0; childIndex < childItems.length; childIndex++) {
-                                            let row = Object.assign({}, newEl);
-                                            const childItem = childItems[childIndex];
-                                            for (const childKey in childItem) {
-                                                if (childItem.hasOwnProperty(childKey)) {
-                                                    if (childKey === 'VatCode') {
-                                                        row['Invoice.Row.' + childKey] = childItem[childKey][0]._;
-                                                    } else {
-                                                        row['Invoice.Row.' + childKey] = childItem[childKey][0];
-                                                    }                                                    
+                                        if (expand === 'rows') {
+                                            if (item[key][0].hasOwnProperty('Row')) {
+                                                childItems = item[key][0].Row;
+                                                for (let childIndex = 0; childIndex < childItems.length; childIndex++) {
+                                                    let row = Object.assign({}, newEl);
+                                                    const childItem = childItems[childIndex];
+                                                    for (const childKey in childItem) {
+                                                        if (childItem.hasOwnProperty(childKey)) {
+                                                            if (childKey === 'VatCode') {
+                                                                row['Invoice.Row.' + childKey] = childItem[childKey][0]._;
+                                                            } else {
+                                                                row['Invoice.Row.' + childKey] = childItem[childKey][0];
+                                                            }
+                                                        }
+                                                    }
+                                                    documents.push(row);
                                                 }
+                                            } else {
+                                                documents.push(newEl);
                                             }
-                                            documents.push(row);
                                         }
                                         break;
                                     default:
@@ -80,22 +105,36 @@ module.exports = (context, req) => {
                     });
 
                     const csvWriter = createCsvWriter({
-                        path: '2019-05-24_fatture_complete.csv',
+                        path: 'output.csv',
                         header: csvHeader,
                     });
 
                     csvWriter.writeRecords(documents)
                     .then(() => {
-                        context.res = {
-                            status: 200,
-                            body: "success",
-                        };
-                        context.done();
+                        fs.readFile('output.csv', function(err,data){
+                            if (!err) {
+                                context.res = {
+                                    status: 200,
+                                    headers: {
+                                        "Content-Type": "text/csv",
+                                        "Content-Disposition": 'attachment;filename="'+outFilename+'"'
+                                    },
+                                    body: new Uint8Array(data)
+                                };
+                                context.done();
+                            } else {
+                                context.res = {
+                                    status: 500,
+                                    body: err.toString(),
+                                };
+                                context.done();
+                            }
+                        });
                     })
                     .catch((res) => {
                         context.res = {
                             status: 500,
-                            body: res,
+                            body: res.toString(),
                         };
                         context.done();
                     });
