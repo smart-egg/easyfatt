@@ -8,7 +8,6 @@
   "dependencies": {
     "csv-writer": "^1.3.0",
     "dateformat": "^3.0.3",
-    "fs": "0.0.1-security",
     "request": "^2.88.0",
     "xml2js": "^0.4.19"
   },
