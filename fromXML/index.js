@@ -41,6 +41,8 @@ module.exports = (context, req) => {
                     let documents = [];
                     let orderID = '', orderDate = '', shipID = '', shipDate = '';
 
+                    try{
+
                     for (let index = 0; index < temp.length; index++) {
                         const item = temp[index];
                         let newEl = Object.assign({}, company);
@@ -144,7 +146,11 @@ module.exports = (context, req) => {
                             }
                         }
                     }
-
+                }
+                    catch(e)
+                    {
+                        console.log("Error: " + e);
+                    }
                     const csvHeader = Object.keys(documents[0]).map((value) => {
                         return {
                             'id': value,
