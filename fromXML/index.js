@@ -9,11 +9,14 @@ const createCsvStringifier = require('csv-writer').createObjectCsvStringifier;
 module.exports = (context, req) => {
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    const {sourceUrl, expand, outFilename} = req.query || req.body;
+    //const {sourceUrl, expand, outFilename} = req.query || req.body;
+    sourceUrl = req.body.sourceUrl;
+    expand = req.body.expand;
+    outFilename = req.body.outFilename;
     
     getOptions = {
         method: 'GET',
-        url: sourceUrl,
+        uri: sourceUrl,
     };
 
     request(getOptions, (err, res, req) => {
